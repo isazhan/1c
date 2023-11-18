@@ -18,5 +18,7 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('apps.api.urls')),
+    path('api/', include('apps.api.urls')),
+    path('cabinet/', include('apps.cabinet.urls')),
+    path('', include('apps.main.urls')),
 ]
