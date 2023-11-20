@@ -31,7 +31,7 @@ env/scripts/activate
 Linux:
 
 ```bash
-
+pip3 install -r requirements.txt
 ```
 
 Windows:
