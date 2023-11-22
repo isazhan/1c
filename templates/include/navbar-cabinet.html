@@ -23,7 +23,8 @@
 
         <ul class="navbar-nav ms-auto">
             <li class="nav-item"> 
-                <a  class="btn text-white">Руководство по сайту</a>
+                <a class="btn text-white">Баланс:</a>
+                <a>0</a>
             </li>
             <li class="dropdown">
                 <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">
@@ -31,12 +32,9 @@
                 </button>
                 <ul class="dropdown-menu">
                     <li><a class="dropdown-item" href="">Профиль</a></li>
-                    <li><a class="dropdown-item" href="">Выйти</a></li>
+                    <li><a class="dropdown-item" href="{% url 'logout_user' %}">Выйти</a></li>
                 </ul>
-            </li>
-            <li class="nav-item">
-                <a href="{% url 'cabinet' %}" class="btn btn-success">Войти в кабинет</a>
-            </li>
+            </li>            
         </ul>
     </div>
 </header>
