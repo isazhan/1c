@@ -1,6 +1,9 @@
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.template import loader
+from django.http import HttpResponse
+from db import get_db_handle as db
 
 
 def login_user(request):
@@ -25,3 +28,27 @@ def logout_user(request):
 @login_required
 def cabinet(request):
     return render(request, 'cabinet/cabinet.html')
+
+
+@login_required
+def instances(request):
+    col = db()['instances']
+    query = {'user': request.user.username}
+    doc = col.find(query)
+    context = {'instances': doc}
+    template = loader.get_template('cabinet/instances.html')    
+    return HttpResponse(template.render(context, request))
+
+
+@login_required
+def create_instance(request):
+    import secrets
+
+    col = db()['instances']
+    data = {
+        'instance' : 777,
+        'token': secrets.token_urlsafe(),
+        'user': request.user.username,
+    }
+    x = col.insert_one(data)
+    return redirect('instances')

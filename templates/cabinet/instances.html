@@ -1,0 +1,18 @@
+{% extends '../base/base-cabinet.html' %}
+
+{% block content %}
+<h1>Instances</h1>
+
+<a type="button" class="btn btn-success" href="{% url 'create_instance' %}">
+    Создать инстанс
+</a>
+
+<ul>
+{% for x in instances %}
+<li>
+    {{ x.instance }}
+</li>
+{% endfor %}
+</ul>
+
+{% endblock content %}
