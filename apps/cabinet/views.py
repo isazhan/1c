@@ -45,8 +45,13 @@ def create_instance(request):
     import secrets
 
     col = db()['instances']
+    doc = col.find({}, {'_id': 0, 'instance': 1}).sort('_id', -1).limit(1)
+    try:
+        instance = doc[0]['instance'] + 1
+    except:
+        instance = 1000000
     data = {
-        'instance' : 777,
+        'instance' : instance,
         'token': secrets.token_urlsafe(),
         'user': request.user.username,
     }
