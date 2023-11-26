@@ -57,3 +57,20 @@ def create_instance(request):
     }
     x = col.insert_one(data)
     return redirect('instances')
+
+'''
+cabinet def 1:
+create instance -> open driver globals() --detach
+get qr through ajax
+wait login -> stop ajax and change status
+wait logout -> start ajax and change status
+
+cabinet def 2:
+send message
+
+options = webdriver.ChromeOptions()
+options.add_argument('--headless')
+driver1 = webdriver.Chrome(options=options)
+driver1.get("https://web.whatsapp.com/")
+time.sleep(5)
+'''
