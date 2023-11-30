@@ -4,6 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.template import loader
 from django.http import HttpResponse
 from db import get_db_handle as db
+from selenium import webdriver
+import time
 
 
 def login_user(request):
@@ -57,6 +59,24 @@ def create_instance(request):
     }
     x = col.insert_one(data)
     return redirect('instances')
+
+
+def get_qr(request):
+    options = webdriver.ChromeOptions()
+    options.add_argument('--user-data-dir=./User_Data')
+    driver = webdriver.Chrome(options=options)
+    driver.get('https://web.whatsapp.com/')
+
+    qr = None
+    while qr==None:
+        try:
+            qr_code_element = driver.find_element(webdriver.common.by.By.CLASS_NAME, "_19vUU")
+            qr = qr_code_element.get_attribute("data-ref")
+        except:
+            pass
+        time.sleep(1)
+
+    return
 
 '''
 cabinet def 1:
