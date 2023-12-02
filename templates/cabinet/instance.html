@@ -1,0 +1,45 @@
+{% extends '../base/base-cabinet.html' %}
+
+{% block content %}
+<h1>Instance .....</h1>
+
+<a type="button" onclick="openDriver()" class="btn btn-success">
+    Получить QR код
+</a>
+
+<a id="qrcode"></a>
+
+<script>
+    function openDriver(){
+        var CSRFtoken = $('input[name=csrfmiddlewaretoken]').val();
+        $.post({
+            url: "{% url 'get_qr' %}",
+            data: {
+                instance: 1000000,
+                csrfmiddlewaretoken: CSRFtoken,
+            },
+            success: function(response) {
+                if (response.status == True) {
+                    getQR();
+                }
+            },
+        })
+    }
+
+    function getQR() {
+        var CSRFtoken = $('input[name=csrfmiddlewaretoken]').val();
+        $.ajax({
+            type: 'get',
+            url: "{% url 'get_qr' %}",
+            data: {csrfmiddlewaretoken: CSRFtoken},
+            success: function(response) {
+                $('#qrcode').text(response.qr);
+            },
+            complete: function(response) {
+                setTimeout(getQR(), 1000)
+            },
+        })
+    }
+</script>
+
+{% endblock content %}

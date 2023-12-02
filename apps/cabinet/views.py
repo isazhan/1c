@@ -62,21 +62,30 @@ def create_instance(request):
 
 
 def get_qr(request):
-    options = webdriver.ChromeOptions()
-    options.add_argument('--user-data-dir=./User_Data')
-    driver = webdriver.Chrome(options=options)
-    driver.get('https://web.whatsapp.com/')
+    if request.method == 'POST':
+        print('post')
+        options = webdriver.ChromeOptions()
+        options.add_argument('--user-data-dir=./User_Data')
+        driver = webdriver.Chrome(options=options)
+        driver.get('https://web.whatsapp.com/')
+        return True
 
-    qr = None
-    while qr==None:
-        try:
-            qr_code_element = driver.find_element(webdriver.common.by.By.CLASS_NAME, "_19vUU")
-            qr = qr_code_element.get_attribute("data-ref")
-        except:
-            pass
-        time.sleep(1)
+    if request.method == 'GET':
+        print('get')
+        qr = None
+        while qr==None:
+            try:
+                qr_code_element = driver.find_element(webdriver.common.by.By.CLASS_NAME, "_19vUU")
+                qr = qr_code_element.get_attribute("data-ref")
+            except:
+                pass
+            time.sleep(1)
+        return qr
 
-    return
+def instance(request):
+    context = {}
+    template = loader.get_template('cabinet/instance.html')    
+    return HttpResponse(template.render(context, request))
 
 '''
 cabinet def 1:
