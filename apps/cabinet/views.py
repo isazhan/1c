@@ -6,6 +6,7 @@ from django.http import HttpResponse
 from db import get_db_handle as db
 from selenium import webdriver
 import time
+from django.views.decorators.csrf import csrf_exempt
 
 
 def login_user(request):
@@ -60,17 +61,20 @@ def create_instance(request):
     x = col.insert_one(data)
     return redirect('instances')
 
-
+"""
+@csrf_exempt
 def get_qr(request):
+    print('def get_qr')
     if request.method == 'POST':
         print('post')
         options = webdriver.ChromeOptions()
         options.add_argument('--user-data-dir=./User_Data')
+        options.add_experimental_option('detach', True)
         driver = webdriver.Chrome(options=options)
         driver.get('https://web.whatsapp.com/')
-        return True
+        return HttpResponse('ok')
 
-    if request.method == 'GET':
+    if request.method == 'GET':        
         print('get')
         qr = None
         while qr==None:
@@ -80,12 +84,38 @@ def get_qr(request):
             except:
                 pass
             time.sleep(1)
-        return qr
+            print(qr)
+        return HttpResponse(qr)
+"""
 
-def instance(request):
+def instance(request, inst_number):
+    open_driver(request, inst_number)
     context = {}
-    template = loader.get_template('cabinet/instance.html')    
+    template = loader.get_template('cabinet/instance.html')
     return HttpResponse(template.render(context, request))
+
+
+def open_driver(request, inst_number):
+    options = webdriver.ChromeOptions()
+    options.add_argument('--user-data-dir=..//instances/'+str(inst_number))
+    options.add_experimental_option('detach', True)
+    driver = webdriver.Chrome(options=options)
+    driver.get('https://web.whatsapp.com/')
+
+    qr = None
+    for i in range(60):
+        try:
+            qr_code_element = driver.find_element(webdriver.common.by.By.CLASS_NAME, "_19vUU")
+            qr = qr_code_element.get_attribute("data-ref")
+            col = db()['instances']
+            doc = col[inst_number]
+            doc['qr'] = qr
+        except:
+            pass
+        time.sleep(1)
+
+    driver.close()
+
 
 '''
 cabinet def 1:

@@ -10,7 +10,7 @@
 <ul>
 {% for x in instances %}
 <li>
-    {{ x.instance }}
+    <a href="{% url 'instance' inst_number=x.instance %}">{{ x.instance }}</a>
 </li>
 {% endfor %}
 </ul>

@@ -9,6 +9,7 @@
 
 <a id="qrcode"></a>
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script>
     function openDriver(){
         var CSRFtoken = $('input[name=csrfmiddlewaretoken]').val();
@@ -19,7 +20,8 @@
                 csrfmiddlewaretoken: CSRFtoken,
             },
             success: function(response) {
-                if (response.status == True) {
+                console.log(response);
+                if (response == 'ok') {
                     getQR();
                 }
             },
@@ -33,7 +35,8 @@
             url: "{% url 'get_qr' %}",
             data: {csrfmiddlewaretoken: CSRFtoken},
             success: function(response) {
-                $('#qrcode').text(response.qr);
+                console.log(response);
+                $('#qrcode').text(response);
             },
             complete: function(response) {
                 setTimeout(getQR(), 1000)
