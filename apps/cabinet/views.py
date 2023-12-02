@@ -57,6 +57,7 @@ def create_instance(request):
         'instance' : instance,
         'token': secrets.token_urlsafe(),
         'user': request.user.username,
+        'qr': '',
     }
     x = col.insert_one(data)
     return redirect('instances')
@@ -89,33 +90,48 @@ def get_qr(request):
 """
 
 def instance(request, inst_number):
-    open_driver(request, inst_number)
-    context = {}
+    #open_driver(request, inst_number)
+    context = {'instance': inst_number}
     template = loader.get_template('cabinet/instance.html')
     return HttpResponse(template.render(context, request))
 
 
-def open_driver(request, inst_number):
-    options = webdriver.ChromeOptions()
-    options.add_argument('--user-data-dir=..//instances/'+str(inst_number))
-    options.add_experimental_option('detach', True)
-    driver = webdriver.Chrome(options=options)
-    driver.get('https://web.whatsapp.com/')
+@csrf_exempt
+def open_driver(request):
+    if request.method == 'POST':
+        options = webdriver.ChromeOptions()
+        options.add_argument("--remote-debugging-port=9222")
+        options.add_argument('--user-data-dir=..//instances/'+str(request.POST['instance']))
+        #options.add_experimental_option('detach', True)
+        driver = webdriver.Chrome(options=options)
+        driver.get('https://web.whatsapp.com/')
 
-    qr = None
-    for i in range(60):
-        try:
-            qr_code_element = driver.find_element(webdriver.common.by.By.CLASS_NAME, "_19vUU")
-            qr = qr_code_element.get_attribute("data-ref")
-            col = db()['instances']
-            doc = col[inst_number]
-            doc['qr'] = qr
-        except:
-            pass
-        time.sleep(1)
+        for i in range(30):
+            try:
+                qr_code_element = driver.find_element(webdriver.common.by.By.CLASS_NAME, "_19vUU")
+                qr = qr_code_element.get_attribute("data-ref")
+                print(qr)
+                col = db()['instances']
+                query = {'instance': int(request.POST['instance'])}
+                value = {"$set": {"qr": qr}}
+                x = col.update_one(query, value)
+            except:
+                pass
+            time.sleep(1)
+        x = col.update_one(query, {"$set": {"qr": None}})
 
-    driver.close()
+        driver.close()
 
+
+@csrf_exempt
+def get_qr(request):
+    if request.method == 'GET':
+        time.sleep(2)
+        col = db()['instances']
+        query = {'instance': int(request.GET['instance'])}
+        doc = col.find(query)
+        qr = doc[0]['qr']
+        return HttpResponse(qr)
 
 '''
 cabinet def 1:

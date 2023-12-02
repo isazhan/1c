@@ -1,9 +1,11 @@
 {% extends '../base/base-cabinet.html' %}
 
 {% block content %}
-<h1>Instance .....</h1>
 
-<a type="button" onclick="openDriver()" class="btn btn-success">
+
+<h1>Instance {{ instance }}</h1>
+
+<a type="button" onclick="openDriver('{{ instance }}')" class="btn btn-success">
     Получить QR код
 </a>
 
@@ -11,37 +13,26 @@
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script>
-    function openDriver(){
-        var CSRFtoken = $('input[name=csrfmiddlewaretoken]').val();
+    function openDriver(instance){
         $.post({
-            url: "{% url 'get_qr' %}",
+            url: "{% url 'open_driver' %}",
             data: {
-                instance: 1000000,
-                csrfmiddlewaretoken: CSRFtoken,
-            },
-            success: function(response) {
-                console.log(response);
-                if (response == 'ok') {
-                    getQR();
-                }
-            },
+                instance: instance
+            }
         })
+        getQR(instance)
     }
 
-    function getQR() {
-        var CSRFtoken = $('input[name=csrfmiddlewaretoken]').val();
-        $.ajax({
-            type: 'get',
-            url: "{% url 'get_qr' %}",
-            data: {csrfmiddlewaretoken: CSRFtoken},
-            success: function(response) {
-                console.log(response);
-                $('#qrcode').text(response);
-            },
-            complete: function(response) {
-                setTimeout(getQR(), 1000)
-            },
-        })
+    function getQR(instance) {
+        for (var i=0; i<20; i++){
+            $.get({
+                url: "{% url 'get_qr' %}",
+                data: {instance: instance},
+                success: function(response) {
+                    $('#qrcode').text(response);
+                }
+            })            
+        }
     }
 </script>
 
