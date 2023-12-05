@@ -10,6 +10,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.forms import UserCreationForm
 from django.urls import reverse_lazy
 from django.views import generic
+import os
+from django.conf import settings
 
 
 class sign_up(generic.CreateView):
@@ -109,8 +111,10 @@ def instance(request, inst_number):
 def open_driver(request):
     if request.method == 'POST':
         options = webdriver.ChromeOptions()
-        options.add_argument("--remote-debugging-port=9222")
-        options.add_argument('--user-data-dir=..//instances/'+str(request.POST['instance']))
+        #options.add_argument("--remote-debugging-port=9222")
+        #options.add_argument('--allow-profiles-outside-user-dir')
+        dir = os.path.dirname(settings.BASE_DIR) + '/instances/' + str(request.POST['instance'])
+        options.add_argument('--user-data-dir='+dir)
         #options.add_experimental_option('detach', True)
         driver = webdriver.Chrome(options=options)
         driver.get('https://web.whatsapp.com/')
