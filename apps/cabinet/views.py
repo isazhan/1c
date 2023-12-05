@@ -131,7 +131,7 @@ def open_driver(request):
             except:
                 pass
             time.sleep(1)
-        x = col.update_one(query, {"$set": {"qr": None}})
+        x = col.update_one(query, {"$set": {"qr": ''}})
 
         driver.close()
 
