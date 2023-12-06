@@ -1,4 +1,5 @@
 {% load static %}
+<!--
 <header class="navbar navbar-expand-sm bg-dark navbar-dark sticky-top">
     <div class="container-fluid">
         <ul class="navbar-nav">
@@ -10,12 +11,10 @@
             </li>
             <li class="nav-item"> 
                 <a href="/" class="btn text-white">Главная</a>
-            </li>
-            <!--
+            </li>            
             <li class="nav-item">
                 <a class="btn text-white">Управление доступом</a>
-            </li>
-            -->
+            </li>            
 
         </ul>
 
@@ -38,3 +37,36 @@
         </ul>
     </div>
 </header>
+-->
+
+
+<div class="d-flex flex-column align-items-center align-items-sm-start text-white min-vh-100">
+    <a class="navbar-brand" href="/">
+        <img src="{% static 'base/PSI.png' %}" alt="Logo" width="200">
+    </a>
+
+    <ul>
+        <li>
+            <a href="">{{ user }}</a>
+        </li>
+        <li>
+            <a href="">Баланс:</a>
+        </li>
+        <li>
+            <a href="">Тариф:</a>
+        </li>
+    </ul>
+
+    <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start">
+        <li class="nav-item">
+            <a href="{% url 'instances' %}" class="nav-link align-middle px-0">
+                <i></i> <span class="ms-1 d-none d-sm-inline">Инстансы</span>
+            </a>
+        </li>
+    </ul>
+
+    <div>
+        <a class="dropdown-item" href="{% url 'logout_user' %}">Выйти</a>
+    </div>
+
+</div>

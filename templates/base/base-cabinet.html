@@ -8,9 +8,18 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 
-{% include '../include/navbar-cabinet.html' %}
+<body class="container-fluid">
+    <div class="row flex-nowrap">
 
-{% block content %}
-{% endblock content %}
+        <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-dark">
+        {% include '../include/navbar-cabinet.html' %}
+        </div>
 
+        <div class="col">
+        {% block content %}
+        {% endblock content %}
+        </div>
+
+    </div>
+</body>
 </html>
