@@ -5,9 +5,9 @@
 
 <h1>Instance {{ instance }}</h1>
 
-<a type="button" onclick="openDriver('{{ instance }}')" class="btn btn-success">
-    Получить QR код
-</a>
+{% if auth == False %}
+<a type="button" onclick="openDriver('{{ instance }}')" class="btn btn-success">Получить QR код</a>
+{% endif %}
 
 <div id="qrcode"></div>
 
@@ -30,8 +30,21 @@
                 url: "{% url 'get_qr' %}",
                 data: {instance: instance},
                 success: function(response) {
+                    console.log('qr'+String(i));
                     document.getElementById("qrcode").innerHTML = "";
                     new QRCode(document.getElementById("qrcode"), response);
+                }
+            })
+            $.get({
+                url: "{% url 'check_auth' %}",
+                data: {instance: instance},
+                success: function(response) {
+                    console.log(response);
+                    if (response === true) {
+                        console.log('auth'+String(i));
+                        document.getElementById("qrcode").innerHTML = "";
+                        location.reload;
+                    }
                 }
             })
         }

@@ -65,10 +65,11 @@ def create_instance(request):
     except:
         instance = 1000000
     data = {
-        'instance' : instance,
+        'instance': instance,
         'token': secrets.token_urlsafe(),
         'user': request.user.username,
         'qr': '',
+        'auth': False,
     }
     x = col.insert_one(data)
     return redirect('instances')
@@ -101,8 +102,14 @@ def get_qr(request):
 """
 
 def instance(request, inst_number):
-    #open_driver(request, inst_number)
-    context = {'instance': inst_number}
+    col = db()['instances']
+    query = {'instance': inst_number}
+    doc = col.find(query)
+    auth = doc[0]['auth']
+    context = {
+        'instance': inst_number,
+        'auth': auth,
+        }
     template = loader.get_template('cabinet/instance.html')
     return HttpResponse(template.render(context, request))
 
@@ -118,22 +125,29 @@ def open_driver(request):
         #options.add_experimental_option('detach', True)
         driver = webdriver.Chrome(options=options)
         driver.get('https://web.whatsapp.com/')
+        col = db()['instances']
+        query = {'instance': int(request.POST['instance'])}
 
         for i in range(30):
             try:
                 qr_code_element = driver.find_element(webdriver.common.by.By.CLASS_NAME, "_19vUU")
                 qr = qr_code_element.get_attribute("data-ref")
-                print(qr)
-                col = db()['instances']
-                query = {'instance': int(request.POST['instance'])}
                 value = {"$set": {"qr": qr}}
                 x = col.update_one(query, value)
+            except:
+                pass
+            try:
+                a = driver.find_element(webdriver.common.by.By.CLASS_NAME, "_2QgSC")
+                value = {"$set": {"auth": True}}
+                x = col.update_one(query, value)
+                break
             except:
                 pass
             time.sleep(1)
         x = col.update_one(query, {"$set": {"qr": ''}})
 
         driver.close()
+        time.sleep(5)
 
 
 @csrf_exempt
@@ -146,6 +160,18 @@ def get_qr(request):
         qr = doc[0]['qr']
         return HttpResponse(qr)
 
+
+@csrf_exempt
+def check_auth(request):
+    if request.method == 'GET':
+        col = db()['instances']
+        query = {'instance': int(request.GET['instance'])}
+        doc = col.find(query)
+        auth = doc[0]['auth']
+        print(auth)
+        print(type(auth))
+        return HttpResponse(auth)
+    
 '''
 cabinet def 1:
 create instance -> open driver globals() --detach
