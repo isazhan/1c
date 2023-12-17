@@ -7,24 +7,27 @@ from db import get_db_handle as db
 from selenium import webdriver
 import time
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.forms import UserCreationForm
-from django.urls import reverse_lazy
-from django.views import generic
 import os
 from django.conf import settings
+from .models import CustomUser
 
-
-class sign_up(generic.CreateView):
-    form_class = UserCreationForm
-    success_url = reverse_lazy('login_user')
-    template_name = 'cabinet/signup.html'
+@csrf_exempt
+def sign_up(request):
+    if request.method == 'POST':
+        email = request.POST['username']
+        password = request.POST['password']
+        user = CustomUser.objects.create_user(email=email, password=password)
+        login(request, user)
+        return redirect('cabinet')
+    else:
+        return render(request, 'cabinet/signup.html')
 
 
 def login_user(request):
     if request.method == 'POST':
-        username = request.POST['username']
+        email = request.POST['username']
         password = request.POST['password']
-        user = authenticate(username=username, password=password)
+        user = authenticate(email=email, password=password)
         if user is not None:
             login(request, user)
             return redirect('cabinet')
@@ -47,7 +50,7 @@ def cabinet(request):
 @login_required
 def instances(request):
     col = db()['instances']
-    query = {'user': request.user.username}
+    query = {'user': request.user.email}
     doc = col.find(query)
     context = {'instances': doc}
     template = loader.get_template('cabinet/instances.html')    
@@ -67,7 +70,7 @@ def create_instance(request):
     data = {
         'instance': instance,
         'token': secrets.token_urlsafe(),
-        'user': request.user.username,
+        'user': request.user.email,
         'qr': '',
         'auth': False,
     }
@@ -188,3 +191,42 @@ driver1 = webdriver.Chrome(options=options)
 driver1.get("https://web.whatsapp.com/")
 time.sleep(5)
 '''
+
+def one_message(request):
+    if request.method == 'POST':
+        instance = request.POST['instance']
+        telnumber = request.POST['telnumber']
+        message = request.POST['message']
+    else:
+        col = db()['instances']
+        query = {'user': request.user.email, 'auth': True}
+        doc = col.find(query)
+        context = {'instances': doc}
+        template = loader.get_template('cabinet/one_message.html')
+        return HttpResponse(template.render(context, request))
+
+
+def few_messages(request):
+    return render(request, 'cabinet/few_messages.html')
+
+
+def send_message(request, instance, telnumber, message):
+    options = webdriver.ChromeOptions()
+    dir = os.path.dirname(settings.BASE_DIR) + '/instances/' + str(instance)
+    options.add_argument('--user-data-dir='+dir)
+    driver = webdriver.Chrome(options=options)
+    driver.get('https://web.whatsapp.com/')
+    time.sleep(10)
+
+    search_input = driver.find_element("xpath", "//div[@contenteditable='true'][@data-tab='3']")
+    search_input.send_keys(telnumber)
+    time.sleep(2)
+
+    search_input.send_keys(webdriver.common.keys.Keys.RETURN)
+    time.sleep(2)
+
+    message_input = driver.find_element("xpath", "//div[@contenteditable='true'][@data-tab='10']")
+
+    message_input.send_keys(message)
+    message_input.send_keys(webdriver.common.keys.Keys.RETURN)
+    return

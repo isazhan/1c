@@ -42,18 +42,18 @@
 
 <div class="d-flex flex-column align-items-center align-items-sm-start text-white min-vh-100">
     <a class="navbar-brand" href="/">
-        <img src="{% static 'base/PSI.png' %}" alt="Logo" width="200">
+        <img src="{% static 'base/logo.png' %}" alt="Logo" width="80">
     </a>
 
     <ul>
         <li>
-            <a href="">{{ user }}</a>
+            <a href="#">{{ user }}</a>
         </li>
         <li>
-            <a href="">Баланс:</a>
+            <a href="#">Баланс:</a>
         </li>
         <li>
-            <a href="">Тариф:</a>
+            <a href="#">Тариф:</a>
         </li>
     </ul>
 
@@ -63,6 +63,19 @@
                 <i></i> <span class="ms-1 d-none d-sm-inline">Инстансы</span>
             </a>
         </li>
+
+        <li class="nav-item">
+            <a href="{% url 'one_message' %}" class="nav-link align-middle px-0">
+                <i></i> <span class="ms-1 d-none d-sm-inline">Одиночные сообщения</span>
+            </a>
+        </li>
+        <!--
+        <li class="nav-item">
+            <a href="{% url 'few_messages' %}" class="nav-link align-middle px-0">
+                <i></i> <span class="ms-1 d-none d-sm-inline">Рассылка</span>
+            </a>
+        </li>
+        -->
     </ul>
 
     <div>

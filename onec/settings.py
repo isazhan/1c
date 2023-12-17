@@ -131,5 +131,7 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+AUTH_USER_MODEL = 'cabinet.CustomUser'
+
 LOGIN_URL = '/cabinet/login_user'
 LOGOUT_URL = '/'

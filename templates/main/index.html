@@ -1,5 +1,20 @@
 {% extends '../base/base.html' %}
+{% load static %}
 
 {% block content %}
-<h1>Index</h1>
+<div class="ps-5 bg-success text-white rounded">
+    <div class="d-flex">
+
+        <div class="col align-self-center">
+            <h1>Whatsapp рассылки напрямую через 1C</h1>
+            <p>Готовая интеграция между 1C и WhatsApp</p>
+        </div>
+        
+        <div class="col-7">
+            <img src="{% static 'index/index-1.png' %}" width="600">
+        </div>
+
+    </div>    
+</div>
+
 {% endblock content %}

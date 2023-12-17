@@ -1,0 +1,19 @@
+{% extends '../base/base-cabinet.html' %}
+
+{% block content %}
+<h1>One message</h1>
+
+<form action="{% url 'one_message' %}" method="POST">
+    {% csrf_token %}
+    <select name="instance" required="required">
+        <option disabled>Выберите инстанс</option>
+        {% for x in instances %}
+        <option value="{{ x.instance }}">{{ x.instance }}</option>
+        {% endfor %}
+    </select>
+    <input type="tel" name="telnumber">
+    <input type="text" name="message">
+    <button type="submit" class="btn btn-primary">Отправить</button>
+</form>
+
+{% endblock content %}
