@@ -9,32 +9,45 @@
 <a type="button" onclick="openDriver('{{ instance }}')" class="btn btn-success">Получить QR код</a>
 {% endif %}
 
+<div id="alert"></div>
 <div id="qrcode"></div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
 <script type="text/javascript">
     function openDriver(instance){
+        document.getElementById("alert").innerHTML = "Минуточку, сейчас появится QR код";
         $.post({
             url: "{% url 'open_driver' %}",
             data: {
                 instance: instance
             }
         })
-        getQR(instance)
+        getQR(instance);
+        checkAuth(instance);
     }
 
-    function getQR(instance) {
-        for (var i=0; i<20; i++){
+
+    async function getQR(instance) {
+        for (var i=0; i<15; i++){
             $.get({
                 url: "{% url 'get_qr' %}",
                 data: {instance: instance},
                 success: function(response) {
-                    console.log('qr'+String(i));
-                    document.getElementById("qrcode").innerHTML = "";
-                    new QRCode(document.getElementById("qrcode"), response);
+                    if (response !== 'None') {
+                        console.log(response);
+                        console.log('qr'+String(i));
+                        document.getElementById("qrcode").innerHTML = "";
+                        new QRCode(document.getElementById("qrcode"), response);
+                    }
                 }
-            })
+            });
+        }
+        clearQR;
+    }
+
+    async function checkAuth(instance) {
+        for (var i=0; i<15; i++) {
             $.get({
                 url: "{% url 'check_auth' %}",
                 data: {instance: instance},
@@ -46,9 +59,14 @@
                         location.reload(true);
                     }
                 }
-            })
+            });
         }
     }
+
+    function clearQR() {
+        document.getElementById("qrcode").innerHTML = "";
+    }
+
 </script>
 
 {% endblock content %}

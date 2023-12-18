@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.template import loader
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from db import get_db_handle as db
 from selenium import webdriver
 import time
@@ -130,7 +130,7 @@ def open_driver(request):
         driver.get('https://web.whatsapp.com/')
         col = db()['instances']
         query = {'instance': int(request.POST['instance'])}
-
+        
         for i in range(30):
             try:
                 qr_code_element = driver.find_element(webdriver.common.by.By.CLASS_NAME, "_19vUU")
@@ -167,6 +167,7 @@ def get_qr(request):
 @csrf_exempt
 def check_auth(request):
     if request.method == 'GET':
+        time.sleep(2)
         col = db()['instances']
         query = {'instance': int(request.GET['instance'])}
         doc = col.find(query)
@@ -197,6 +198,7 @@ def one_message(request):
         instance = request.POST['instance']
         telnumber = request.POST['telnumber']
         message = request.POST['message']
+        send_message(request, instance, telnumber, message)
     else:
         col = db()['instances']
         query = {'user': request.user.email, 'auth': True}
@@ -229,4 +231,6 @@ def send_message(request, instance, telnumber, message):
 
     message_input.send_keys(message)
     message_input.send_keys(webdriver.common.keys.Keys.RETURN)
-    return
+    time.sleep(2)
+    driver.close()
+    return 'sent'
