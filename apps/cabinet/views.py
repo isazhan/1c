@@ -199,6 +199,7 @@ def one_message(request):
         telnumber = request.POST['telnumber']
         message = request.POST['message']
         send_message(request, instance, telnumber, message)
+        return redirect('one_message')
     else:
         col = db()['instances']
         query = {'user': request.user.email, 'auth': True}

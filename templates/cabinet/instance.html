@@ -7,6 +7,8 @@
 
 {% if auth == False %}
 <a type="button" onclick="openDriver('{{ instance }}')" class="btn btn-success">Получить QR код</a>
+{% else %}
+<div>Вы авторизованы</div>
 {% endif %}
 
 <div id="alert"></div>
@@ -29,42 +31,44 @@
 
 
     async function getQR(instance) {
-        for (var i=0; i<15; i++){
-            $.get({
-                url: "{% url 'get_qr' %}",
-                data: {instance: instance},
-                success: function(response) {
-                    if (response !== 'None') {
-                        console.log(response);
-                        console.log('qr'+String(i));
-                        document.getElementById("qrcode").innerHTML = "";
-                        new QRCode(document.getElementById("qrcode"), response);
+        for (var i = 0; i < 15; i++) {
+            await new Promise(resolve => {
+                $.get({
+                    url: "{% url 'get_qr' %}",
+                    data: { instance: instance },
+                    success: function (response) {
+                        if (response !== 'None') {
+                            console.log(response);
+                            console.log('qr' + String(i));
+                            document.getElementById("qrcode").innerHTML = "";
+                            new QRCode(document.getElementById("qrcode"), response);
+                        }
+                        resolve();
                     }
-                }
+                });
             });
         }
-        clearQR;
+        location.reload();
     }
 
     async function checkAuth(instance) {
-        for (var i=0; i<15; i++) {
-            $.get({
-                url: "{% url 'check_auth' %}",
-                data: {instance: instance},
-                success: function(response) {
-                    console.log(response);
-                    if (response === true) {
-                        console.log('auth'+String(i));
-                        document.getElementById("qrcode").innerHTML = "";
-                        location.reload(true);
+        for (var i = 0; i < 15; i++) {
+            await new Promise(resolve => {
+                $.get({
+                    url: "{% url 'check_auth' %}",
+                    data: { instance: instance },
+                    success: function (response) {
+                        console.log(response);
+                        if (response === true) {
+                            console.log('auth' + String(i));
+                            document.getElementById("qrcode").innerHTML = "";
+                            location.reload();
+                        }
+                        resolve();
                     }
-                }
+                });
             });
         }
-    }
-
-    function clearQR() {
-        document.getElementById("qrcode").innerHTML = "";
     }
 
 </script>
