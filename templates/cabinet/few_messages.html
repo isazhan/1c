@@ -3,6 +3,35 @@
 {% block content %}
 <h1>Few messages</h1>
 
+<form>
+    <input type="file" id="telnumbers" accept=".xlsx">
+    <button type="button" onclick="uploadFile()">Загрузить</button>
+</form>
+
+<div id="content"></div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+<script>
+    function uploadFile() {
+        var fileInput = document.getElementById('telnumbers');
+        var file = fileInput.files[0];
+
+        if (file) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var arrayBuffer = e.target.result;
+                var workbook = XLSX.read(arrayBuffer, { type: 'array' });
+                var firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                var columnData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 }).map(row => row[0]);
+                document.getElementById('content').innerHTML = columnData;
+            };
+            reader.readAsArrayBuffer(file);
+        } else {
+            alert('Пожалуйста, выберите файл');
+        }
+    }
+</script>
 
 
 {% endblock content %}
