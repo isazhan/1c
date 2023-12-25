@@ -1,20 +1,37 @@
 {% extends '../base/base-cabinet.html' %}
 
 {% block content %}
-<h1>Few messages</h1>
+<h1>Рассылка</h1>
 
+<h4>Выберите excel файл с номерами телефонов. Затем нажмите "Загрузить файл"</h4>
 <form>
-    <input type="file" id="telnumbers" accept=".xlsx">
-    <button type="button" onclick="uploadFile()">Загрузить</button>
+    <input type="file" id="telnumbers1" accept=".xlsx">
+    <button type="button" onclick="uploadFile()">Загрузить файл</button>
 </form>
 
-<div id="content"></div>
+<h4 id="numbers-alert"></h4>
+
+<form action="{% url 'few_messages' %}" method="POST">
+    {% csrf_token %}
+    <select name="instance" required="required">
+        <option disabled>Выберите инстанс</option>
+        {% for x in instances %}
+        <option value="{{ x.instance }}">{{ x.instance }}</option>
+        {% endfor %}
+    </select><br>
+    <textarea name="telnumbers" id="telnumbers" cols="50" rows="5"></textarea><br>
+    <label for="message">Текст рассылки:</label><br>
+    <textarea name="message" cols="50" rows="5"></textarea><br>
+    <input type="range" id="range" name="range" min="40" max="200">
+    <p>Интенсивность отправки: <output id="value"></output> секунд между сообщениями</p>
+    <button type="submit">Отправить рассылку</button>
+</form>
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 <script>
     function uploadFile() {
-        var fileInput = document.getElementById('telnumbers');
+        var fileInput = document.getElementById('telnumbers1');
         var file = fileInput.files[0];
 
         if (file) {
@@ -24,13 +41,21 @@
                 var workbook = XLSX.read(arrayBuffer, { type: 'array' });
                 var firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                 var columnData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 }).map(row => row[0]);
-                document.getElementById('content').innerHTML = columnData;
+                document.getElementById('numbers-alert').innerHTML = 'Этим номерам будет отправлена рассылка:';
+                document.getElementById('telnumbers').value = columnData;
             };
             reader.readAsArrayBuffer(file);
         } else {
             alert('Пожалуйста, выберите файл');
         }
     }
+
+    const value = document.querySelector("#value");
+    const input = document.querySelector("#range");
+    value.textContent = input.value;
+    input.addEventListener("input", (event) => {
+    value.textContent = event.target.value;
+    });
 </script>
 
 

@@ -210,7 +210,22 @@ def one_message(request):
 
 
 def few_messages(request):
-    return render(request, 'cabinet/few_messages.html')
+    if request.method == 'POST':
+        instance = request.POST['instance']
+        telnumbers = request.POST['telnumbers'].split(sep=',')
+        message = request.POST['message']
+        range = int(request.POST['range'])
+        for telnumber in telnumbers:
+            send_message(request, instance, telnumber, message)
+            time.sleep(range)
+        return redirect('few_messages')
+    else:
+        col = db()['instances']
+        query = {'user': request.user.email, 'auth': True}
+        doc = col.find(query)
+        context = {'instances': doc}
+        template = loader.get_template('cabinet/few_messages.html')
+        return HttpResponse(template.render(context, request))
 
 
 def send_message(request, instance, telnumber, message):
