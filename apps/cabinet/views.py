@@ -10,6 +10,7 @@ from django.views.decorators.csrf import csrf_exempt
 import os
 from django.conf import settings
 from .models import CustomUser
+import asyncio
 
 @csrf_exempt
 def sign_up(request):
@@ -75,7 +76,16 @@ def create_instance(request):
         'auth': False,
     }
     x = col.insert_one(data)
+    create_driver(request, instance)
     return redirect('instances')
+
+
+def create_driver(request, instance):
+    options = webdriver.ChromeOptions()
+    options.add_argument('incognito')
+    globals()['driver' + str(instance)] = webdriver.Chrome(options=options)
+    globals()['driver' + str(instance)].get('https://web.whatsapp.com/')
+
 
 """
 @csrf_exempt
