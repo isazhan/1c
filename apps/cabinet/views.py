@@ -86,6 +86,14 @@ def create_driver(request, instance):
     globals()['driver' + str(instance)] = webdriver.Chrome(options=options)
     globals()['driver' + str(instance)].get('https://web.whatsapp.com/')
 
+    col = db()['instances']
+    query = {'instance': instance}
+    value = {'$set': {
+        'session': globals()['driver' + str(instance)].session_id,
+        'executor': globals()['driver' + str(instance)].command_executor._url,
+        }}
+    x = col.update_one(query, value)
+
 
 """
 @csrf_exempt

@@ -6,25 +6,31 @@ while True:
     col = db()['instances']
     query = {}
 
-    doc = col.find(query, {'_id': 0, 'instance': 1})
+    doc = col.find(query, {'_id': 0, 'instance': 1, 'session': 1, 'executor': 1})
 
     for i in doc:
+        options = webdriver.ChromeOptions()
+        executor = i['executor']
+        driver = webdriver.Remote(command_executor=executor, options=options)
+        driver.close()
+        driver.session_id = i['session']
         status = ''
+
         try:
-            if globals()['driver' + str(i['instance'])].current_url == 'https://web.whatsapp.com/':
+            if driver.current_url == 'https://web.whatsapp.com/':
                 try:
-                    qr = globals()['driver' + str(i['instance'])].find_element(webdriver.common.by.By.CLASS_NAME, "_19vUU")
+                    qr = driver.find_element(webdriver.common.by.By.CLASS_NAME, "_19vUU")
                     status = 'noauth'
                 except:
                     try:
-                        search_input = globals()['driver' + str(i['instance'])].find_element("xpath", "//div[@contenteditable='true'][@data-tab='3']")
+                        search_input = driver.find_element("xpath", "//div[@contenteditable='true'][@data-tab='3']")
                         status = 'auth'
                     except:
                         pass
             else:
-                status = 'nodriver'
+                status = 'wrongurl'
         except:
-            pass
+            status = 'nodriver'
 
         query = {'instance': i['instance']}
         value = {"$set": {"status": status}}
