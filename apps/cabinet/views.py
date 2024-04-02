@@ -11,6 +11,7 @@ import os
 from django.conf import settings
 from .models import CustomUser
 import asyncio
+import json
 
 @csrf_exempt
 def sign_up(request):
@@ -61,7 +62,7 @@ def instances(request):
 @login_required
 def create_instance(request):
     import secrets
-
+    import datetime
     col = db()['instances']
     doc = col.find({}, {'_id': 0, 'instance': 1}).sort('_id', -1).limit(1)
     try:
@@ -70,29 +71,33 @@ def create_instance(request):
         instance = 1000000
     data = {
         'instance': instance,
+        'create_time': datetime.datetime.today(),
         'token': secrets.token_urlsafe(),
         'user': request.user.email,
         'qr': '',
-        'auth': False,
     }
     x = col.insert_one(data)
     create_driver(request, instance)
     return redirect('instances')
 
 
-def create_driver(request, instance):
-    options = webdriver.ChromeOptions()
-    options.add_argument('incognito')
-    globals()['driver' + str(instance)] = webdriver.Chrome(options=options)
-    globals()['driver' + str(instance)].get('https://web.whatsapp.com/')
+@csrf_exempt
+def create_driver(request):
+    if request.method == 'POST':        
+        data = json.loads(request.body)
+        instance = int(data['instance'])
+        options = webdriver.ChromeOptions()
+        options.add_argument('incognito')
+        globals()['driver' + str(instance)] = webdriver.Chrome(options=options)
+        globals()['driver' + str(instance)].get('https://web.whatsapp.com/')
 
-    col = db()['instances']
-    query = {'instance': instance}
-    value = {'$set': {
-        'session': globals()['driver' + str(instance)].session_id,
-        'executor': globals()['driver' + str(instance)].command_executor._url,
-        }}
-    x = col.update_one(query, value)
+        col = db()['instances']
+        query = {'instance': instance}
+        value = {'$set': {
+            'session': globals()['driver' + str(instance)].session_id,
+            'executor': globals()['driver' + str(instance)].command_executor._url,
+            }}
+        x = col.update_one(query, value)
 
 
 """
@@ -126,10 +131,10 @@ def instance(request, inst_number):
     col = db()['instances']
     query = {'instance': inst_number}
     doc = col.find(query)
-    auth = doc[0]['auth']
+    status = doc[0]['status']
     context = {
         'instance': inst_number,
-        'auth': auth,
+        'status': status,
         }
     template = loader.get_template('cabinet/instance.html')
     return HttpResponse(template.render(context, request))
@@ -220,7 +225,7 @@ def one_message(request):
         return redirect('one_message')
     else:
         col = db()['instances']
-        query = {'user': request.user.email, 'auth': True}
+        query = {'user': request.user.email, 'status': 'auth'}
         doc = col.find(query)
         context = {'instances': doc}
         template = loader.get_template('cabinet/one_message.html')
@@ -247,12 +252,20 @@ def few_messages(request):
 
 
 def send_message(request, instance, telnumber, message):
+    #options = webdriver.ChromeOptions()
+    #dir = os.path.dirname(settings.BASE_DIR) + '/instances/' + str(instance)
+    #options.add_argument('--user-data-dir='+dir)
+    #driver = webdriver.Chrome(options=options)
+    #driver.get('https://web.whatsapp.com/')
+    #time.sleep(10)
+    col = db()['instances']
+    query = {'instance': instance}
+    doc = col.find_one(query, {'_id': 0, 'instance': 1, 'session': 1, 'executor': 1})
     options = webdriver.ChromeOptions()
-    dir = os.path.dirname(settings.BASE_DIR) + '/instances/' + str(instance)
-    options.add_argument('--user-data-dir='+dir)
-    driver = webdriver.Chrome(options=options)
-    driver.get('https://web.whatsapp.com/')
-    time.sleep(10)
+    executor = doc['executor']
+    driver = webdriver.Remote(command_executor=executor, options=options)
+    driver.close()
+    driver.session_id = doc['session']
 
     search_input = driver.find_element("xpath", "//div[@contenteditable='true'][@data-tab='3']")
     search_input.send_keys(telnumber)
@@ -266,5 +279,5 @@ def send_message(request, instance, telnumber, message):
     message_input.send_keys(message)
     message_input.send_keys(webdriver.common.keys.Keys.RETURN)
     time.sleep(2)
-    driver.close()
+    #driver.close()
     return 'sent'

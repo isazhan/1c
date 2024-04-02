@@ -3,7 +3,13 @@
 {% block content %}
 
 
-<h1>Instance {{ instance }}</h1>
+<h1>Инстанс {{ instance }}</h1>
+
+{% if status == 'nodriver' %}
+<a type="button" onclick="createDriver('{{ instance }}')" class="btn btn-success">Перезапустить драйвер</a>
+{% endif %}
+
+
 
 {% if auth == False %}
 <a type="button" onclick="openDriver('{{ instance }}')" class="btn btn-success">Получить QR код</a>
@@ -17,6 +23,14 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
 <script type="text/javascript">
+    function createDriver(instance){
+        fetch("{% url 'create_driver' %}", {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({'instance': instance})
+        })        
+    }
+
     function openDriver(instance){
         document.getElementById("alert").innerHTML = "Минуточку, сейчас появится QR код";
         $.post({

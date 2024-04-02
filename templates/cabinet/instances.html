@@ -1,18 +1,39 @@
 {% extends '../base/base-cabinet.html' %}
 
 {% block content %}
-<h1>Instances</h1>
+<h1>Все инстансы</h1>
 
 <a type="button" class="btn btn-success" href="{% url 'create_instance' %}">
-    Создать инстанс
+    Создать новый инстанс
 </a>
 
-<ul>
-{% for x in instances %}
-<li>
-    <a href="{% url 'instance' inst_number=x.instance %}">{{ x.instance }}</a>
-</li>
-{% endfor %}
-</ul>
+<div class="table-responsive mt-4">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Инстанс</th>
+                <th>Создано</th>
+                <th>Статус</th>
+            </tr>
+        </thead>
+
+        {% for x in instances %}
+            <tr>
+                <td><a href="{% url 'instance' inst_number=x.instance %}">{{ x.instance }}</a></td>
+                <td>{{ x.create_time }}</td>
+                {% if x.status == 'nodriver' %}
+                <td>Драйвер не запущен</td>
+                {% elif x.status == 'wrongurl' %}
+                <td>Неправильный URL</td>
+                {% elif x.status == 'noauth' %}
+                <td>Неавторизован</td>
+                {% elif x.status == 'auth' %}
+                <td>Авторизован</td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+
+    </table>
+</div>
 
 {% endblock content %}
