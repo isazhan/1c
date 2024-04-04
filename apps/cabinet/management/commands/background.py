@@ -20,14 +20,14 @@ while True:
             try:
                 if driver.current_url == 'https://web.whatsapp.com/':
                     try:
-                        qr = driver.find_element(webdriver.common.by.By.CLASS_NAME, "_19vUU")
+                        qr = driver.find_element(webdriver.common.by.By.CLASS_NAME, "_akau")
                         status = 'noauth'
                     except:
                         try:
                             search_input = driver.find_element("xpath", "//div[@contenteditable='true'][@data-tab='3']")
                             status = 'auth'
                         except:
-                            pass
+                            status = 'wrongclassname'
                 else:
                     status = 'wrongurl'
             except:

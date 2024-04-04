@@ -179,25 +179,29 @@ def open_driver(request):
 @csrf_exempt
 def get_qr(request):
     if request.method == 'GET':
-        time.sleep(2)
+        data = json.loads(request.body)        
         col = db()['instances']
-        query = {'instance': int(request.GET['instance'])}
-        doc = col.find(query)
-        qr = doc[0]['qr']
+        query = {'instance': int(data['instance'])}
+        doc = col.find_one(query, {'_id': 0, 'instance': 1, 'session': 1, 'executor': 1})
+        options = webdriver.ChromeOptions()
+        executor = doc['executor']
+        driver = webdriver.Remote(command_executor=executor, options=options)
+        driver.close()
+        driver.session_id = doc['session']
+        qr = driver.find_element(webdriver.common.by.By.CLASS_NAME, "_akau")
+        print(qr)
         return HttpResponse(qr)
 
 
 @csrf_exempt
 def check_auth(request):
     if request.method == 'GET':
-        time.sleep(2)
+        time.sleep(1)
         col = db()['instances']
         query = {'instance': int(request.GET['instance'])}
-        doc = col.find(query)
-        auth = doc[0]['auth']
-        print(auth)
-        print(type(auth))
-        return HttpResponse(auth)
+        doc = col.find_one(query)
+        status = doc['status']
+        return HttpResponse(status)
     
 '''
 cabinet def 1:

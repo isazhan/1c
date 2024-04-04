@@ -5,20 +5,26 @@
 
 <h1>Инстанс {{ instance }}</h1>
 
-{% if status == 'nodriver' %}
-<a type="button" onclick="createDriver('{{ instance }}')" class="btn btn-success">Перезапустить драйвер</a>
-{% endif %}
+<div class="border rounded">
+    <h3>Статус</h3>
 
+    {% if status == 'nodriver' %}
+    <p>Драйвер не запущен</p>
+    <a type="button" onclick="createDriver('{{ instance }}')" class="btn btn-success">Перезапустить драйвер</a>
+    {% elif status == 'wrongurl' %}
+    <p>Неправильный URL</p>
+    {% elif status == 'noauth' %}
+    <p>Неавторизован</p>
+    <a type="button" onclick="openDriver('{{ instance }}')" class="btn btn-success">Обновить QR код</a>
+    <div id="qrcode"></div>
+    {% elif status == 'auth' %}
+    <p>Авторизован</p>
+    {% endif %}
+</div>
 
-
-{% if auth == False %}
-<a type="button" onclick="openDriver('{{ instance }}')" class="btn btn-success">Получить QR код</a>
-{% else %}
-<div>Вы авторизованы</div>
-{% endif %}
 
 <div id="alert"></div>
-<div id="qrcode"></div>
+
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
@@ -32,48 +38,31 @@
     }
 
     function openDriver(instance){
-        document.getElementById("alert").innerHTML = "Минуточку, сейчас появится QR код";
-        $.post({
-            url: "{% url 'open_driver' %}",
-            data: {
-                instance: instance
-            }
-        })
         getQR(instance);
         checkAuth(instance);
     }
 
-
-    async function getQR(instance) {
-        for (var i = 0; i < 15; i++) {
-            await new Promise(resolve => {
-                $.get({
-                    url: "{% url 'get_qr' %}",
-                    data: { instance: instance },
-                    success: function (response) {
-                        if (response !== 'None') {
-                            console.log(response);
-                            console.log('qr' + String(i));
-                            document.getElementById("qrcode").innerHTML = "";
-                            new QRCode(document.getElementById("qrcode"), response);
-                        }
-                        resolve();
-                    }
-                });
-            });
-        }
-        location.reload();
+    async function getQR(instance){
+        fetch("{% url 'get_qr' %}", {
+            method: 'GET',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({'instance': instance}),
+            success: function (response) {
+                document.getElementById("qrcode").innerHTML = "";
+                new QRCode(document.getElementById("qrcode"), response);
+            }
+        })
     }
 
     async function checkAuth(instance) {
-        for (var i = 0; i < 15; i++) {
+        for (var i = 0; i < 30; i++) {
             await new Promise(resolve => {
                 $.get({
                     url: "{% url 'check_auth' %}",
                     data: { instance: instance },
                     success: function (response) {
                         console.log(response);
-                        if (response === true) {
+                        if (response === 'auth') {
                             console.log('auth' + String(i));
                             document.getElementById("qrcode").innerHTML = "";
                             location.reload();
