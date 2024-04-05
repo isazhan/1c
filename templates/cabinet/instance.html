@@ -43,23 +43,24 @@
     }
 
     async function getQR(instance){
-        fetch("{% url 'get_qr' %}", {
-            method: 'GET',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({'instance': instance}),
+        $.ajax({
+            url: "{% url 'get_qr' %}",
+            type: 'GET',
+            data: {'instance': instance},
             success: function (response) {
                 document.getElementById("qrcode").innerHTML = "";
                 new QRCode(document.getElementById("qrcode"), response);
             }
-        })
+        })        
     }
 
     async function checkAuth(instance) {
         for (var i = 0; i < 30; i++) {
             await new Promise(resolve => {
-                $.get({
+                $.ajax({
                     url: "{% url 'check_auth' %}",
-                    data: { instance: instance },
+                    type: 'GET',
+                    data: {'instance': instance},
                     success: function (response) {
                         console.log(response);
                         if (response === 'auth') {
@@ -69,7 +70,7 @@
                         }
                         resolve();
                     }
-                });
+                })         
             });
         }
     }
