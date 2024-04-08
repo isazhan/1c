@@ -3,7 +3,7 @@
 {% block content %}
 <h1>One message</h1>
 
-<form action="{% url 'one_message' %}" method="POST">
+<form action="{% url 'message_order' %}" method="POST">
     {% csrf_token %}
     <select name="instance" required="required">
         <option disabled>Выберите инстанс</option>
@@ -11,8 +11,9 @@
         <option value="{{ x.instance }}">{{ x.instance }}</option>
         {% endfor %}
     </select>
-    <input type="tel" name="telnumber">
+    <input type="tel" name="telnumbers">
     <input type="text" name="message">
+    <input type="hidden" name="wait" value="40">
     <button type="submit" class="btn btn-primary">Отправить</button>
 </form>
 

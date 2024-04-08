@@ -11,8 +11,8 @@ urlpatterns = [
     path('create_driver', views.create_driver, name='create_driver'),
     path('get_qr', views.get_qr, name='get_qr'),
     path('check_auth', views.check_auth, name='check_auth'),
-    path('open_driver', views.open_driver, name='open_driver'),
     path('instances/<int:inst_number>/', views.instance, name='instance'),
     path('one_message', views.one_message, name='one_message'),
     path('few_messages', views.few_messages, name='few_messages'),
+    path('message_order', views.message_order, name='message_order'),
 ]
