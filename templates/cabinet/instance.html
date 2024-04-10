@@ -2,26 +2,46 @@
 
 {% block content %}
 
+<div class="container-fluid pt-4 px-4">
+    <div class="row g-4">
 
-<h1>Инстанс {{ instance }}</h1>
+        <div class="col-sm-12 col-md-6 col-xl-4">
+            <div class="bg-secondary rounded h-100 p-4">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h6 class="mb-0">Инстанс #{{ instance }}</h6>
+                    {% if status == 'nodriver' %}
+                    <p>Драйвер не запущен</p>                    
+                    {% elif status == 'wrongurl' %}
+                    <p>Неправильный URL</p>
+                    {% elif status == 'noauth' %}
+                    <p>Неавторизован</p>                    
+                    {% elif status == 'auth' %}
+                    <p>Авторизован</p>
+                    {% endif %}
+                </div>
 
-<div class="border rounded">
-    <h3>Статус</h3>
+                <div>
+                    {% if status == 'nodriver' %}
+                    <a type="button" onclick="createDriver('{{ instance }}')" class="btn btn-success w-100">Перезапустить драйвер</a>
+                    {% elif status == 'noauth' %}
+                    <a type="button" onclick="openDriver('{{ instance }}')" class="btn btn-success w-100">Обновить QR код</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
 
-    {% if status == 'nodriver' %}
-    <p>Драйвер не запущен</p>
-    <a type="button" onclick="createDriver('{{ instance }}')" class="btn btn-success">Перезапустить драйвер</a>
-    {% elif status == 'wrongurl' %}
-    <p>Неправильный URL</p>
-    {% elif status == 'noauth' %}
-    <p>Неавторизован</p>
-    <a type="button" onclick="openDriver('{{ instance }}')" class="btn btn-success">Обновить QR код</a>
-    <div id="qrcode"></div>
-    {% elif status == 'auth' %}
-    <p>Авторизован</p>
-    {% endif %}
+        {% if status == 'noauth' %}
+        <div class="col-sm-12 col-md-6 col-xl-4">
+            <div class="bg-secondary rounded h-100 p-4">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h6 class="mb-0">QR код</h6>
+                </div>
+                <div id="qrcode"></div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
 </div>
-
 
 <div id="alert"></div>
 

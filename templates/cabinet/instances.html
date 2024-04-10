@@ -1,39 +1,46 @@
 {% extends '../base/base-cabinet.html' %}
 
 {% block content %}
-<h1>Все инстансы</h1>
 
-<a type="button" class="btn btn-success" href="{% url 'create_instance' %}">
-    Создать новый инстанс
-</a>
+<div class="container-fluid pt-4 px-4">
+    <div class="row g-4">
+        <div class="col-sm-12 col-xl-6">
+            <div class="bg-secondary rounded h-100 p-4">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h6 class="mb-0">Все инстансы</h6>
+                    <a type="button" class="btn btn-success" href="{% url 'create_instance' %}">
+                        Создать новый инстанс
+                    </a>
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Инстанс</th>
+                            <th scope="col">Создано</th>
+                            <th scope="col">Статус</th>
+                        </tr>
+                    </thead>
 
-<div class="table-responsive mt-4">
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Инстанс</th>
-                <th>Создано</th>
-                <th>Статус</th>
-            </tr>
-        </thead>
+                    {% for x in instances %}
+                        <tr>
+                            <td><a href="{% url 'instance' inst_number=x.instance %}">{{ x.instance }}</a></td>
+                            <td>{{ x.create_time }}</td>
+                            {% if x.status == 'nodriver' %}
+                            <td>Драйвер не запущен</td>
+                            {% elif x.status == 'wrongurl' %}
+                            <td>Неправильный URL</td>
+                            {% elif x.status == 'noauth' %}
+                            <td>Неавторизован</td>
+                            {% elif x.status == 'auth' %}
+                            <td>Авторизован</td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
 
-        {% for x in instances %}
-            <tr>
-                <td><a href="{% url 'instance' inst_number=x.instance %}">{{ x.instance }}</a></td>
-                <td>{{ x.create_time }}</td>
-                {% if x.status == 'nodriver' %}
-                <td>Драйвер не запущен</td>
-                {% elif x.status == 'wrongurl' %}
-                <td>Неправильный URL</td>
-                {% elif x.status == 'noauth' %}
-                <td>Неавторизован</td>
-                {% elif x.status == 'auth' %}
-                <td>Авторизован</td>
-                {% endif %}
-            </tr>
-        {% endfor %}
-
-    </table>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
 
 {% endblock content %}

@@ -1,20 +1,44 @@
 {% extends '../base/base-cabinet.html' %}
 
 {% block content %}
-<h1>One message</h1>
 
-<form action="{% url 'message_order' %}" method="POST">
-    {% csrf_token %}
-    <select name="instance" required="required">
-        <option disabled>Выберите инстанс</option>
-        {% for x in instances %}
-        <option value="{{ x.instance }}">{{ x.instance }}</option>
-        {% endfor %}
-    </select>
-    <input type="tel" name="telnumbers">
-    <input type="text" name="message">
-    <input type="hidden" name="wait" value="40">
-    <button type="submit" class="btn btn-primary">Отправить</button>
-</form>
+<div class="container-fluid pt-4 px-4">
+    <div class="row g-4">
+        <div class="col-sm-12 col-xl-6">
+            <div class="bg-secondary rounded h-100 p-4">
+                <h6 class="mb-4">Одиночное сообщение</h6>
+                <form action="{% url 'message_order' %}" method="POST">
+                    {% csrf_token %}
+                    <!--Instance-->
+                    <div class="form-floating mb-3">
+                        <select class="form-select" name="instance" required="required">
+                            <option disabled>Выберите инстанс</option>
+                            {% for x in instances %}
+                            <option value="{{ x.instance }}">{{ x.instance }}</option>
+                            {% endfor %}
+                        </select>
+                        <label for="floatingSelect">Выберите инстанс</label>
+                    </div>
+                    <!--Telnumber-->
+                    <div class="form-floating mb-3">
+                        <input type="tel" name="telnumbers" class="form-control" id="floatingInput"
+                            placeholder="name@example.com">
+                        <label for="floatingInput">Номер телефона</label>
+                    </div>
+                    <!--Message-->
+                    <div class="form-floating">
+                        <textarea type="text" name="message" class="form-control" placeholder="Leave a comment here"
+                            id="floatingTextarea" style="height: 150px;"></textarea>
+                        <label for="floatingTextarea">Сообщение</label>
+                    </div>
+                    <!--Wait-->
+                    <input type="hidden" name="wait" value="40">
+                    <!--Button-->
+                    <button type="submit" class="btn btn-primary">Отправить</button>
+                </form>
+            </div>
+        </div>    
+    </div>
+</div>
 
 {% endblock content %}
