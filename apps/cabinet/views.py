@@ -101,6 +101,7 @@ def manage_driver(instance):
         options = webdriver.ChromeOptions()
         options.add_argument('incognito')
         options.add_argument('--headless')
+        options.add_argument('--no-sandbox')
         #globals()['driver' + str(instance)] = webdriver.Chrome(options=options)
         #globals()['driver' + str(instance)].get('https://web.whatsapp.com/')
         driver = webdriver.Chrome(options=options)
