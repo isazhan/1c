@@ -100,9 +100,8 @@ def manage_driver(instance):
         #instance = int(data['instance'])
         options = webdriver.ChromeOptions()
         options.add_argument('incognito')
-        options.add_argument('--headless')
-        options.add_argument('--no-sandbox')
-        options.add_argument('--disable-dev-shm-usage')
+        options.add_argument('--headless=new')
+        options.add_argument('user-agent=User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36')
         #globals()['driver' + str(instance)] = webdriver.Chrome(options=options)
         #globals()['driver' + str(instance)].get('https://web.whatsapp.com/')
         driver = webdriver.Chrome(options=options)
@@ -168,6 +167,7 @@ def manage_driver(instance):
             print(status)
             status_update(instance, status)
             time.sleep(2)
+            print(driver.current_url)
 
 
 def status_update(instance, status):
