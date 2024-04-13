@@ -98,13 +98,14 @@ def manage_driver(instance):
     #if request.method == 'POST':        
         #data = json.loads(request.body)
         #instance = int(data['instance'])
+        service = webdriver.ChromeService(executable_path=r'/usr/bin/chromedriver')
         options = webdriver.ChromeOptions()
         options.add_argument('incognito')
         options.add_argument('--headless=new')
         options.add_argument('user-agent=User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36')
         #globals()['driver' + str(instance)] = webdriver.Chrome(options=options)
         #globals()['driver' + str(instance)].get('https://web.whatsapp.com/')
-        driver = webdriver.Chrome(options=options)
+        driver = webdriver.Chrome(service=service ,options=options)
         driver.get('https://web.whatsapp.com/')
 
         col = db()['instances']
