@@ -61,28 +61,30 @@ def instances(request):
 
 
 @login_required
+@csrf_exempt
 def create_instance(request):
-    import secrets
-    import datetime
-    col = db()['instances']
-    doc = col.find({}, {'_id': 0, 'instance': 1}).sort('_id', -1).limit(1)
-    try:
-        instance = doc[0]['instance'] + 1
-    except:
-        instance = 1000000
-    data = {
-        'instance': instance,
-        'create_time': datetime.datetime.today(),
-        'token': secrets.token_urlsafe(),
-        'user': request.user.email,
-        'qr': '',
-    }
-    x = col.insert_one(data)
-    #z = requests.post(create_driver, json={'instance': instance})
-    #globals()['thread' + str(instance)] = threading.Thread(target=create_driver(request, instance))
-    #globals()['thread' + str(instance)].start()
-    create_driver(request, instance)
-    return redirect('instances')
+    if request.method == 'POST':
+        import secrets
+        import datetime
+        col = db()['instances']
+        doc = col.find({}, {'_id': 0, 'instance': 1}).sort('_id', -1).limit(1)
+        try:
+            instance = doc[0]['instance'] + 1
+        except:
+            instance = 1000000
+        data = {
+            'instance': instance,
+            'create_time': datetime.datetime.today(),
+            'token': secrets.token_urlsafe(),
+            'user': request.user.email,
+            'qr': '',
+        }
+        x = col.insert_one(data)
+        #z = requests.post(create_driver, json={'instance': instance})
+        #globals()['thread' + str(instance)] = threading.Thread(target=create_driver(request, instance))
+        #globals()['thread' + str(instance)].start()
+        request.method = 'GET'
+        create_driver(request, instance)
 
 
 @csrf_exempt

@@ -8,9 +8,9 @@
             <div class="bg-secondary rounded h-100 p-4">
                 <div class="d-flex align-items-center justify-content-between mb-4">
                     <h6 class="mb-0">Все инстансы</h6>
-                    <a type="button" class="btn btn-success" href="{% url 'create_instance' %}">
+                    <button id="create_instance" class="btn btn-success" onclick="createInstance()">
                         Создать новый инстанс
-                    </a>
+                    </button>
                 </div>
                 <table class="table">
                     <thead>
@@ -33,6 +33,8 @@
                             <td>Неавторизован</td>
                             {% elif x.status == 'auth' %}
                             <td>Авторизован</td>
+                            {% elif x.status == '' %}
+                            <td>Статус обновляется...</td>
                             {% endif %}
                         </tr>
                     {% endfor %}
@@ -43,4 +45,20 @@
     </div>
 </div>
 
+<script>
+    function createInstance(){
+        var button = document.getElementById('create_instance');
+        button.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Создание..';
+        button.disabled = true;
+
+        fetch("{% url 'create_instance' %}", {
+            method: 'POST',
+            body: JSON.stringify({}),
+        })
+
+        setTimeout(function() {
+            location.reload();
+        }, 3000);
+    };
+</script>
 {% endblock content %}
