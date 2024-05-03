@@ -78,6 +78,7 @@ def create_instance(request):
             'token': secrets.token_urlsafe(),
             'user': request.user.email,
             'qr': '',
+            'authnumber': '',
         }
         x = col.insert_one(data)
         #z = requests.post(create_driver, json={'instance': instance})
@@ -158,11 +159,20 @@ def manage_driver(instance):
                             pass
                     except:
                         try:
-                            qr = driver.find_element(webdriver.common.by.By.CLASS_NAME, "_akau")
-                            qr = qr.get_attribute("data-ref")
-                            value = {"$set": {"qr": qr}}
-                            x = col.update_one(query, value)
+                            #qr = driver.find_element(webdriver.common.by.By.CLASS_NAME, "_akau")
+                            #qr = qr.get_attribute("data-ref")
+                            #value = {"$set": {"qr": qr}}
+                            #x = col.update_one(query, value)
                             status = 'noauth'
+                            doc = col.find_one(query)
+                            if not doc['authnumber']=='':
+                                driver.find_element("xpath", "//span[@tabindex=0]").click()
+                                time.sleep(2)
+                                authnumber = driver.find_element("xpath", "//input[@aria-required='true']")
+                                authnumber.send_keys(doc['authnumber'])
+                                authnumber.send_keys(webdriver.common.keys.Keys.RETURN)
+                                time.sleep(1)
+                                
                         except:
                             pass
                 else:
