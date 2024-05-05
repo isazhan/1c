@@ -78,7 +78,9 @@ def create_instance(request):
             'token': secrets.token_urlsafe(),
             'user': request.user.email,
             'qr': '',
+            'status': '',
             'authnumber': '',
+            'authcode': '',
         }
         x = col.insert_one(data)
         #z = requests.post(create_driver, json={'instance': instance})
@@ -121,7 +123,7 @@ def manage_driver(instance):
             'executor': driver.command_executor._url,
             }}
         #x = col.update_one(query, value)
-
+        i = 0
         while True:
             status = ''
             try:
@@ -129,6 +131,9 @@ def manage_driver(instance):
                     try:
                         search_input = driver.find_element("xpath", "//div[@contenteditable='true'][@data-tab='3']")
                         status = 'auth'
+                        value = {"$set": {"authcode": '', "authnumber": ''}}
+                        x = col.update_one(query, value)
+                        i = 0
                         try:
                             col = db()['messages']
                             doc = col.find_one(query)
@@ -164,15 +169,28 @@ def manage_driver(instance):
                             #value = {"$set": {"qr": qr}}
                             #x = col.update_one(query, value)
                             status = 'noauth'
-                            doc = col.find_one(query)
+                            doc = db()['instances'].find_one({'instance': instance})
                             if not doc['authnumber']=='':
-                                driver.find_element("xpath", "//span[@tabindex=0]").click()
-                                time.sleep(2)
-                                authnumber = driver.find_element("xpath", "//input[@aria-required='true']")
-                                authnumber.send_keys(doc['authnumber'])
-                                authnumber.send_keys(webdriver.common.keys.Keys.RETURN)
-                                time.sleep(1)
-                                
+                                try:
+                                    driver.find_element("xpath", "//span[@tabindex=0]").click()
+                                    time.sleep(2)
+                                    authnumber = driver.find_element("xpath", "//input[@aria-required='true']")
+                                    authnumber.send_keys(doc['authnumber'])
+                                    authnumber.send_keys(webdriver.common.keys.Keys.RETURN)
+                                    time.sleep(1)
+                                except:
+                                    pass
+                                authcode = driver.find_element("xpath", "//div[@aria-details='link-device-phone-number-code-screen-instructions']")
+                                authcode = authcode.get_attribute('data-link-code')
+                                value = {"$set": {"authcode": authcode}}
+                                x = col.update_one(query, value)
+                                i+=1
+                                print(i)
+                                if i==20:
+                                    value = {"$set": {"authcode": '', "authnumber": ''}}
+                                    x = col.update_one(query, value)
+                                    driver.get('https://web.whatsapp.com/')
+                                    i = 0
                         except:
                             pass
                 else:
@@ -183,7 +201,28 @@ def manage_driver(instance):
             print(status)
             status_update(instance, status)
             time.sleep(2)
-            print(driver.current_url)
+            #print(driver.current_url)
+
+
+@login_required
+@csrf_exempt
+def auth_instance(request):
+    print(request)
+    if request.method == 'POST':
+        print(request.POST['instance'])
+        instance = int(request.POST['instance'])
+        authnumber = request.POST['authnumber']
+        col = db()['instances']
+        query = {'instance': instance}
+        value = {"$set": {"authnumber": authnumber}}
+        x = col.update_one(query, value)
+        while True:
+            doc = db()['instances'].find_one({'instance': instance})
+            print(doc)
+            if not doc['authcode'] == '':
+                break
+            time.sleep(1)
+        return HttpResponse(doc['authcode'])
 
 
 def status_update(instance, status):
@@ -218,13 +257,14 @@ def get_qr(request):
 @csrf_exempt
 def check_auth(request):
     if request.method == 'GET':
-        time.sleep(1)
         instance = int(request.GET['instance'])
         col = db()['instances']
         query = {'instance': instance}
-        doc = col.find_one(query)
-        status = doc['status']
-        return HttpResponse(status)
+        while True:
+            doc = col.find_one(query)
+            if doc['status'] == 'auth' or doc['authnumber'] == '':
+                break
+        return HttpResponse('reload')
 
 
 def one_message(request):

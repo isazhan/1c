@@ -15,4 +15,5 @@ urlpatterns = [
     path('one_message', views.one_message, name='one_message'),
     path('few_messages', views.few_messages, name='few_messages'),
     path('message_order', views.message_order, name='message_order'),
+    path('auth_instance', views.auth_instance, name='auth_instance'),
 ]

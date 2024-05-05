@@ -24,24 +24,31 @@
                     {% if status == 'nodriver' %}
                     <a type="button" onclick="createDriver('{{ instance }}')" class="btn btn-success w-100">Перезапустить драйвер</a>
                     {% elif status == 'noauth' %}
-                    <a type="button" onclick="openDriver('{{ instance }}')" class="btn btn-success w-100">Обновить QR код</a>
+                    <form name="auth">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text" id="basic-addon1">+7</span>
+                            <input type="number" class="form-control" placeholder="Номер телефона" aria-label="authnumber"
+                                aria-describedby="basic-addon1" name="authnumber">
+                        </div>
+                        <button id="auth_button" class="btn btn-success w-100" onclick="openDriver('{{ instance }}')">Авторизовать</button>
+                    </form>
                     {% endif %}
                 </div>
             </div>
         </div>
 
-        {% if status == 'noauth' %}
-        <div class="col-sm-12 col-md-6 col-xl-4">
+        <!-- Code -->
+        <div class="col-sm-12 col-md-6 col-xl-4" id="code" style="visibility: hidden;">
             <div class="bg-secondary rounded h-100 p-4">
                 <div class="d-flex align-items-center justify-content-between mb-4">
-                    <h6 class="mb-0">QR код</h6>
+                    <h6 class="mb-0">Код</h6>
                 </div>
                 <div class="d-flex justify-content-center" style="background-color: aliceblue;">
-                    <div class="p-3" id="qrcode"></div>
+                    <div class="p-3" id="authcode"></div>
                 </div>
             </div>
         </div>
-        {% endif %}
+
     </div>
 </div>
 
@@ -60,8 +67,42 @@
     }
 
     function openDriver(instance){
-        getQR(instance);
-        checkAuth(instance);
+        let authnumber = document.forms['auth']['authnumber'].value
+        if (authnumber.toString().length == 10) {
+            toAuth(instance, authnumber);
+            setTimeout(function() {
+                checkAuth(instance);
+            }, 3000);
+        } else {
+            alert("Номер указан неправильно")
+        }        
+    }
+
+    async function toAuth(instance, authnumber){
+        var button = document.getElementById('auth_button');
+        button.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Авторизация...';
+        button.disabled = true;
+
+        $.ajax({
+        url: "{% url 'auth_instance' %}",
+        type: 'POST',
+        data: {
+            'instance': instance, 
+            'authnumber': authnumber,
+        },
+        success: function(response) {
+            //for (const char of response) {
+                //var code = document.createElement('h3');
+                //code.classList.add('border');
+                //code.textContent = char;
+                //document.getElementById("authcode").appendChild(code);
+            //}
+            document.getElementById("authcode").innerHTML = response;
+            document.getElementById("code").style.visibility = 'visible';
+            button.innerHTML = 'Авторизовать';
+            button.disabled = false;
+        }
+        })
     }
 
     async function getQR(instance){
@@ -77,24 +118,16 @@
     }
 
     async function checkAuth(instance) {
-        for (var i = 0; i < 30; i++) {
-            await new Promise(resolve => {
-                $.ajax({
-                    url: "{% url 'check_auth' %}",
-                    type: 'GET',
-                    data: {'instance': instance},
-                    success: function (response) {
-                        console.log(response);
-                        if (response === 'auth') {
-                            console.log('auth' + String(i));
-                            document.getElementById("qrcode").innerHTML = "";
-                            location.reload();
-                        }
-                        resolve();
-                    }
-                })         
-            });
-        }
+        $.ajax({
+            url: "{% url 'check_auth' %}",
+            type: 'GET',
+            data: {'instance': instance},
+            success: function (response) {
+                if (response === 'reload') {
+                    location.reload();
+                }
+            }
+        })
     }
 
 </script>
