@@ -109,10 +109,13 @@ def manage_driver(instance):
         options.add_argument('user-agent=User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36')        
 
         # for linux:
-        service = webdriver.ChromeService(executable_path=r'/usr/bin/chromedriver')
-        driver = webdriver.Chrome(service=service ,options=options)
+        #service = webdriver.ChromeService(executable_path=r'/usr/bin/chromedriver')
+        #driver = webdriver.Chrome(service=service ,options=options)
         # for windows:
         #driver = webdriver.Chrome(options=options)
+        from chromedriver_py import binary_path
+        service = webdriver.ChromeService(executable_path=binary_path)
+        driver = webdriver.Chrome(service=service, options=options)
 
         driver.get('https://web.whatsapp.com/')
 
