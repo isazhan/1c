@@ -86,8 +86,14 @@ def create_instance(request):
         #z = requests.post(create_driver, json={'instance': instance})
         #globals()['thread' + str(instance)] = threading.Thread(target=create_driver(request, instance))
         #globals()['thread' + str(instance)].start()
-        request.method = 'GET'
-        create_driver(request, instance)
+        #request.method = 'GET'
+        #create_driver(request, instance)
+        col = db()['driver_commands']
+        data = {
+            'command_name': 'create_instance',
+            'instance': instance,
+        }
+        x = col.insert_one(data)
 
 
 @csrf_exempt
@@ -97,6 +103,7 @@ def create_driver(request, instance=0):
         instance = int(data['instance'])
     globals()['thread' + str(instance)] = threading.Thread(target=manage_driver(instance))
     globals()['thread' + str(instance)].start()
+
 
 
 def manage_driver(instance):
@@ -219,10 +226,15 @@ def auth_instance(request):
         print(request.POST['instance'])
         instance = int(request.POST['instance'])
         authnumber = request.POST['authnumber']
-        col = db()['instances']
-        query = {'instance': instance}
-        value = {"$set": {"authnumber": authnumber}}
-        x = col.update_one(query, value)
+        
+        col = db()['driver_commands']
+        data = {
+            'command_name': 'auth',
+            'instance': instance,
+            'authnumber': authnumber,
+        }
+        x = col.insert_one(data)
+
         while True:
             doc = db()['instances'].find_one({'instance': instance})
             print(doc)
